@@ -12,12 +12,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-const controller = require('./controllers/index')({});
-const router = require('./routers/index')({controller});
+const dbUtil = require('./utils/db/db-util');
+const riderController = require('./controllers/riderController')(dbUtil);
+const riderRouter = require('./routers/riderRouter')({riderController});
 const middleware = require('./middleware/index')({});
 
 app.use(middleware.authenticateRequest);
-app.use('/riders', router);
+app.use('/riders', riderRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
