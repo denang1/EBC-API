@@ -13,12 +13,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 const dbUtil = require('./utils/db/db-util');
+const statsController = require('./controllers/statsController')(dbUtil);
+const statsRouter = require('./routers/statsRouter')({statsController: statsController});
 const riderController = require('./controllers/riderController')(dbUtil);
 const riderRouter = require('./routers/riderRouter')({riderController});
 const middleware = require('./middleware/index')({});
 
 app.use(middleware.authenticateRequest);
 app.use('/riders', riderRouter);
+app.use('/stats', statsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

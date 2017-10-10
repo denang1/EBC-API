@@ -1,5 +1,5 @@
-var express = require('express');
-var riderRouter = express.Router();
+const express = require('express');
+const riderRouter = express.Router();
 
 module.exports = ({riderController}) => {
   riderRouter.route('/')
