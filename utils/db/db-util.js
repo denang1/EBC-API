@@ -38,7 +38,32 @@ module.exports = {
                     if(err) {
                         return reject(err);
                     }
-
+                    resolve(results);
+                });
+        });
+    },
+    getRidesByDate: function(year) {
+        return new Promise(function(resolve, reject) {
+            connection.query(
+                `SELECT 
+                a.ride_date, 
+                a.ride_name, 
+                a.ride_destination, 
+                a.num_riders, 
+                a.distance, 
+                a.pace, 
+                d.rider_firstName as leaderFirstName, 
+                d.rider_lastName as leaderLastName,
+                d.member_number as leaderMemberNumber
+                FROM Rides a, Led_Ride b, Swept_Ride c, Riders d
+                WHERE a.ride_id = b.ride_id AND b.ride_id = c.ride_id 
+                AND b.member_number = d.member_number
+                AND a.ride_date like "%${year}-%"
+                ORDER BY ride_date DESC`, 
+                function(err, results) {
+                    if(err) {
+                        return reject(err);
+                    }
                     resolve(results);
                 });
         });

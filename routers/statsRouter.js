@@ -1,12 +1,11 @@
 const express = require('express');
 const statsRouter = express.Router();
 
-module.exports = function(getRidersByMiles) {
+module.exports = function(statsController) {
     statsRouter.route('/ridersByMiles')
-    .get(getRidersByMiles.statsController);
+        .get(statsController.getRidersByMiles);
+    statsRouter.route('/ridesByDate')
+        .get(statsController.getRidesByDate);
 
     return statsRouter;
 };
-
-// var router = require('statsRouter'); // function(value)
-// var statsRouter = router()

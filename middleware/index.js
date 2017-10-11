@@ -1,6 +1,5 @@
-module.exports = ({}) => {
-    const authenticateRequest = (req, res, next) => {
+module.exports = {
+    authenticateRequest: function(req, res, next) {
         next();
-    };
-    return {authenticateRequest};
+    }
 };

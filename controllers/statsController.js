@@ -9,5 +9,14 @@ module.exports = function(dbUtil) {
         });
     };
 
-    return getRidersByMiles;
+    const getRidesByDate = function(req, res, next) {
+        dbUtil.getRidesByDate(req.query.year)
+        .then(function(results) {
+            res.json(results);
+        })
+        .catch(function(err) {
+            res.status(400).send(err);
+        });
+    }
+    return {getRidersByMiles, getRidesByDate};
 };
