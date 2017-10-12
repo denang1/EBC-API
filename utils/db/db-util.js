@@ -45,21 +45,34 @@ module.exports = {
     getRidesByDate: function(year) {
         return new Promise(function(resolve, reject) {
             connection.query(
-                `SELECT 
-                a.ride_date, 
-                a.ride_name, 
-                a.ride_destination, 
-                a.num_riders, 
-                a.distance, 
-                a.pace, 
-                d.rider_firstName as leaderFirstName, 
-                d.rider_lastName as leaderLastName,
-                d.member_number as leaderMemberNumber
-                FROM Rides a, Led_Ride b, Swept_Ride c, Riders d
-                WHERE a.ride_id = b.ride_id AND b.ride_id = c.ride_id 
-                AND b.member_number = d.member_number
-                AND a.ride_date like "%${year}-%"
-                ORDER BY ride_date DESC`, 
+                `SELECT DISTINCT
+                c.ride_id,
+                c.ride_date,
+                c.ride_name,
+                c.ride_destination,
+                c.num_riders,
+                c.distance,
+                c.pace,
+                a.rider_firstName as leaderFirstName,
+                a.rider_lastName as leaderLastName,
+                b.rider_firstName as sweepFirstName,
+                b.rider_lastName as sweepLastName
+                FROM 
+                Riders a, Riders b, Rides c,
+                (SELECT
+                a.ride_id,
+                a.member_number as leaderMemberNumber
+                FROM Led_Ride a) LeaderTable,
+                (SELECT
+                a.ride_id,
+                a.member_number as sweepMemberNumber
+                FROM Swept_Ride a) SweepTable
+                WHERE a.member_number = LeaderTable.leaderMemberNumber 
+                AND b.member_number = SweepTable.sweepMemberNumber
+                AND LeaderTable.ride_id = SweepTable.ride_id
+                AND SweepTable.ride_id = c.ride_id
+                AND c.ride_date like "%${year}-%"
+                ORDER BY c.ride_date DESC, c.ride_id ASC`, 
                 function(err, results) {
                     if(err) {
                         return reject(err);
