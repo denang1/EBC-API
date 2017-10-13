@@ -9,8 +9,14 @@ const connection = mysql.createConnection({
 
 module.exports = {
     getAllRiders: function() {
-        return new Promise((resolve, reject) => {
-            connection.query('select * from riders', (err, results) => {
+        return new Promise(function(resolve, reject) {
+            connection.query(
+                `SELECT member_number AS memberNumber,
+                rider_firstName AS firstName,
+                rider_lastName AS lastName,
+                isMember 
+                FROM Riders`,
+                function(err, results) {
                 if(err) {
                     return reject(err);
                 }
@@ -22,18 +28,19 @@ module.exports = {
     getRidersByMiles: function(year) {
         return new Promise(function(resolve, reject) {
             connection.query(
-                `SELECT a.member_number, a.rider_firstName, 
-                a.rider_lastName, 
-                SUM(c.ride_distance) as total, 
-                b.ride_date
+                `SELECT a.member_number AS memberNumber, 
+                a.rider_firstName AS firstName, 
+                a.rider_lastName AS lastName, 
+                SUM(c.ride_distance) AS totalMiles, 
+                b.ride_date AS date
                 FROM Riders a, Rides b, Rode_In c
                 WHERE b.isValid = 0 
                 AND a.member_number = c.member_number 
                 AND b.ride_id = c.ride_id 
                 AND b.ride_date like "%${year}-%" 
-                GROUP BY member_number 
-                ORDER BY total DESC,
-                a.rider_lastName ASC`, 
+                GROUP BY memberNumber 
+                ORDER BY totalMiles DESC,
+                lastName ASC`, 
                 function(err, results) {
                     if(err) {
                         return reject(err);
@@ -46,26 +53,26 @@ module.exports = {
         return new Promise(function(resolve, reject) {
             connection.query(
                 `SELECT DISTINCT
-                c.ride_id,
-                c.ride_date,
-                c.ride_name,
-                c.ride_destination,
-                c.num_riders,
+                c.ride_id AS id,
+                c.ride_date AS date,
+                c.ride_name AS name,
+                c.ride_destination AS destination,
+                c.num_riders AS numRiders,
                 c.distance,
                 c.pace,
-                a.rider_firstName as leaderFirstName,
-                a.rider_lastName as leaderLastName,
-                b.rider_firstName as sweepFirstName,
-                b.rider_lastName as sweepLastName
+                a.rider_firstName AS leaderFirstName,
+                a.rider_lastName AS leaderLastName,
+                b.rider_firstName AS sweepFirstName,
+                b.rider_lastName AS sweepLastName
                 FROM 
                 Riders a, Riders b, Rides c,
                 (SELECT
                 a.ride_id,
-                a.member_number as leaderMemberNumber
+                a.member_number AS leaderMemberNumber
                 FROM Led_Ride a) LeaderTable,
                 (SELECT
                 a.ride_id,
-                a.member_number as sweepMemberNumber
+                a.member_number AS sweepMemberNumber
                 FROM Swept_Ride a) SweepTable
                 WHERE a.member_number = LeaderTable.leaderMemberNumber 
                 AND b.member_number = SweepTable.sweepMemberNumber
@@ -83,7 +90,14 @@ module.exports = {
     },
     getRider: function(member_number) {
         return new Promise(function(resolve, reject){
-            connection.query(`select * from riders where member_number = ${member_number}`, function(err, results){
+            connection.query(
+                `SELECT member_number AS memberNumber,
+                rider_firstName AS firstName,
+                rider_lastName AS lastName,
+                isMember 
+                FROM Riders 
+                WHERE member_number = ${member_number}`, 
+                function(err, results){
                 if(err) {
                     return reject(err);
                 }
